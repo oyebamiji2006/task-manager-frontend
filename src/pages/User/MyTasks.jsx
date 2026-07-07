@@ -7,7 +7,10 @@ const MyTasks = () => {
     const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [newTask, setNewTask] = useState({ title: "", description: "", priority: "medium", dueDate: "", category: "" });
+    const [newTask, setNewTask] = useState({
+        title: "", description: "", priority: "medium",
+        dueDate: "", dueTime: "", category: ""
+    });
     const navigate = useNavigate();
 
     const fetchTasks = async (status) => {
@@ -37,15 +40,28 @@ const MyTasks = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem("token");
+
+            // Combine dueDate + dueTime into a single ISO datetime
+            let dueDateValue = newTask.dueDate;
+            if (newTask.dueDate && newTask.dueTime) {
+                dueDateValue = new Date(`${newTask.dueDate}T${newTask.dueTime}`).toISOString();
+            }
+
             await fetch("https://task-manager-backend-fdic.onrender.com/api/tasks", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(newTask),
+                body: JSON.stringify({
+                    title: newTask.title,
+                    description: newTask.description,
+                    priority: newTask.priority,
+                    dueDate: dueDateValue,
+                    category: newTask.category,
+                }),
             });
-            setNewTask({ title: "", description: "", priority: "medium", dueDate: "", category: "" });
+            setNewTask({ title: "", description: "", priority: "medium", dueDate: "", dueTime: "", category: "" });
             setShowForm(false);
             fetchTasks(filter);
         } catch (err) {
@@ -76,6 +92,15 @@ const MyTasks = () => {
         s === "completed" ? "bg-green-100 text-green-600" :
         s === "in-progress" ? "bg-blue-100 text-blue-600" :
         "bg-gray-100 text-gray-600";
+
+    const formatDueDate = (dueDate) => {
+        if (!dueDate) return null;
+        const d = new Date(dueDate);
+        return d.toLocaleString([], {
+            year: "numeric", month: "short", day: "numeric",
+            hour: "2-digit", minute: "2-digit"
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
@@ -122,19 +147,34 @@ const MyTasks = () => {
                                 <option value="high">High Priority</option>
                             </select>
                             <input
-                                type="date"
+                                type="text"
+                                placeholder="Category (e.g. Work, Personal)"
                                 className="border border-gray-300 rounded-lg px-4 py-2"
-                                value={newTask.dueDate}
-                                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                value={newTask.category}
+                                onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
                             />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Category (e.g. Work, Personal)"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            value={newTask.category}
-                            onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
-                        />
+                        {/* Date and Time side by side */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-sm text-gray-500 mb-1 block">Due Date</label>
+                                <input
+                                    type="date"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                    value={newTask.dueDate}
+                                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm text-gray-500 mb-1 block">Due Time ⏰</label>
+                                <input
+                                    type="time"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                    value={newTask.dueTime}
+                                    onChange={(e) => setNewTask({ ...newTask, dueTime: e.target.value })}
+                                />
+                            </div>
+                        </div>
                         <div className="flex gap-3">
                             <button type="submit" className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
                                 Create
@@ -176,7 +216,11 @@ const MyTasks = () => {
                                     <span className={`text-xs px-2 py-1 rounded-full ${priorityColor(task.priority)}`}>{task.priority}</span>
                                     <span className={`text-xs px-2 py-1 rounded-full ${statusColor(task.status)}`}>{task.status}</span>
                                     {task.category && <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-600">{task.category}</span>}
-                                    {task.dueDate && <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">Due: {new Date(task.dueDate).toLocaleDateString()}</span>}
+                                    {task.dueDate && (
+                                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">
+                                            ⏰ {formatDueDate(task.dueDate)}
+                                        </span>
+                                    )}
                                 </div>
                                 {task.progress > 0 && (
                                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
