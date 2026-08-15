@@ -1,4 +1,18 @@
+// At the top of Layout.jsx, after imports
 import React, { useState, useEffect, useRef } from "react";
+// ... other imports ...
+
+// Add this useEffect
+useEffect(() => {
+    // Force body background color
+    document.body.style.backgroundColor = "#f3f4f6";
+    document.documentElement.style.backgroundColor = "#f3f4f6";
+    
+    return () => {
+        document.body.style.backgroundColor = "";
+        document.documentElement.style.backgroundColor = "";
+    };
+}, []);
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -9,19 +23,19 @@ import {
 const AlertBanner = ({ alerts, onDismiss }) => {
   if (!alerts || alerts.length === 0) return null;
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-72 md:w-80">
       {alerts.map((alert) => (
         <div
           key={alert.id}
-          className={`p-4 rounded-lg shadow-lg text-white flex items-start justify-between gap-2 ${
+          className={`p-3 rounded-lg shadow-lg text-white flex items-start justify-between gap-2 ${
             alert.type === "overdue" ? "bg-red-600" : "bg-yellow-500"
           }`}
         >
           <div>
-            <p className="font-semibold text-sm">
+            <p className="font-semibold text-xs md:text-sm">
               {alert.type === "overdue" ? "🚨 Overdue Task" : "⏰ Due Soon"}
             </p>
-            <p className="text-sm mt-1">{alert.message}</p>
+            <p className="text-xs md:text-sm mt-1">{alert.message}</p>
           </div>
           <button
             onClick={() => onDismiss(alert.id)}
@@ -40,6 +54,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const alertedTasksRef = useRef(new Set());
 
@@ -52,15 +67,12 @@ const Layout = ({ children }) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
   };
 
-  // Request notification permission on mount
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
-  // Poll tasks every 60 seconds and check for alerts
   useEffect(() => {
     if (!user) return;
-
     const fetchAndCheck = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -70,13 +82,11 @@ const Layout = ({ children }) => {
         );
         const data = await res.json();
         const tasks = data.tasks || data || [];
-
         checkTaskAlerts(tasks, alertedTasksRef, (alert) => {
           setAlerts((prev) => [
             ...prev,
             { ...alert, id: Date.now() + Math.random() },
           ]);
-          // Auto-dismiss after 10 seconds
           setTimeout(() => {
             setAlerts((prev) =>
               prev.filter((a) => a.message !== alert.message)
@@ -87,9 +97,8 @@ const Layout = ({ children }) => {
         console.error("Notification check failed:", err);
       }
     };
-
-    fetchAndCheck(); // Run immediately on login
-    const interval = setInterval(fetchAndCheck, 60000); // Then every 60s
+    fetchAndCheck();
+    const interval = setInterval(fetchAndCheck, 60000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -100,16 +109,21 @@ const Layout = ({ children }) => {
     { label: "AI Assistant", path: "/ai-chat", icon: "🤖" },
   ];
 
+  const handleNav = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Alert Banners */}
       <AlertBanner alerts={alerts} onDismiss={dismissAlert} />
 
-      {/* Sidebar */}
+      {/* ── DESKTOP SIDEBAR (hidden on mobile) ── */}
       <div
-        className={`${
+        className={`hidden md:flex ${
           collapsed ? "w-16" : "w-64"
-        } bg-indigo-900 text-white flex flex-col transition-all duration-300`}
+        } bg-indigo-900 text-white flex-col transition-all duration-300 min-h-screen sticky top-0`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between p-4 border-b border-indigo-700">
@@ -129,7 +143,7 @@ const Layout = ({ children }) => {
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <p className="font-semibold text-sm">{user?.name}</p>
-            <p className="text-indigo-300 text-xs">{user?.email}</p>
+            <p className="text-indigo-300 text-xs truncate">{user?.email}</p>
           </div>
         )}
 
@@ -163,8 +177,83 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">{children}</div>
+      {/* ── MOBILE LAYOUT ── */}
+      <div className="flex flex-col flex-1 min-h-screen md:hidden">
+        {/* Mobile Top Bar */}
+        <div className="bg-indigo-900 text-white flex items-center justify-between px-4 py-3 sticky top-0 z-40">
+          <h1 className="text-base font-bold">TaskFlow AI</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="text-white text-2xl leading-none"
+            >
+              {mobileMenuOpen ? "✕" : "☰"}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="bg-indigo-800 text-white z-30 shadow-lg">
+            <div className="px-4 py-3 border-b border-indigo-700">
+              <p className="font-semibold text-sm">{user?.name}</p>
+              <p className="text-indigo-300 text-xs truncate">{user?.email}</p>
+            </div>
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => handleNav(item.path)}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-b border-indigo-700 ${
+                  location.pathname === item.path
+                    ? "bg-indigo-600 text-white"
+                    : "text-indigo-200 hover:bg-indigo-700"
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-indigo-200 hover:bg-red-600 hover:text-white transition-colors"
+            >
+              <span className="text-lg">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
+
+        {/* Mobile Page Content - FIXED with proper padding */}
+        <div className="flex-1 overflow-auto pb-20 pt-2 px-2 sm:px-3">
+          {children}
+        </div>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <div className="bg-indigo-900 text-white flex justify-around items-center py-2 px-1 border-t border-indigo-700 sticky bottom-0 z-40">
+          {navItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors ${
+                location.pathname === item.path
+                  ? "text-white bg-indigo-600"
+                  : "text-indigo-300 hover:text-white"
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-[10px]">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── DESKTOP MAIN CONTENT ── */}
+      <div className="hidden md:block flex-1 overflow-auto p-4 md:p-6 bg-gray-50">
+        {children}
+      </div>
     </div>
   );
 };
