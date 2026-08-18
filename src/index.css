@@ -36,27 +36,39 @@ html, body, #root {
     background-color: #f3f4f6 !important;
 }
 
-/* ✅ FIX: White text on white background */
-.text-gray-800, .text-gray-700, .text-gray-600 {
+/* ✅ STRONG FIX: Force text colors */
+* {
     color: #1f2937 !important;
 }
 
-.text-gray-500, .text-gray-400 {
+.text-gray-500, .text-gray-400, .text-gray-300 {
     color: #6b7280 !important;
 }
 
-.text-gray-900 {
-    color: #111827 !important;
+.text-white {
+    color: #ffffff !important;
 }
 
-/* Fix card text */
-.bg-white .text-gray-800,
-.bg-white .text-gray-700,
-.bg-white .text-gray-600 {
+/* Fix headings */
+h1, h2, h3, h4, h5, h6 {
     color: #1f2937 !important;
 }
 
-.bg-white .text-gray-500,
-.bg-white .text-gray-400 {
+/* Fix paragraphs and labels */
+p, span, label, div {
+    color: #1f2937 !important;
+}
+
+/* Except for specific elements that should be white */
+.text-white, .text-white * {
+    color: #ffffff !important;
+}
+
+/* Fix card text */
+.bg-white, .bg-white * {
+    color: #1f2937 !important;
+}
+
+.bg-white .text-gray-500, .bg-white .text-gray-400 {
     color: #6b7280 !important;
 }
