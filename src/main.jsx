@@ -4,20 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
-<<<<<<< HEAD
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/service-worker.js')
-//       .then((registration) => {
-//         console.log('✅ Service Worker registered:', registration.scope)
-//       })
-//       .catch((error) => {
-//         console.log('❌ Service Worker registration failed:', error)
-//       })
-//   })
-// }
-=======
-// AI Chat Fix — Uncomment service worker registration
+// AI Chat Fix — Enable service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
@@ -30,7 +17,6 @@ if ('serviceWorker' in navigator) {
   })
 }
 
->>>>>>> 4fb6014 (Fix AI Chat to send tasks)
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
@@ -38,3 +24,4 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </StrictMode>,
 )
+
