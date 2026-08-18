@@ -72,3 +72,21 @@ p, span, label, div {
 .bg-white .text-gray-500, .bg-white .text-gray-400 {
     color: #6b7280 !important;
 }
+/* ✅ ULTIMATE FIX — Force all text to be visible */
+body, .bg-white, .bg-gray-50, .bg-gray-100 {
+    color: #1f2937 !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, div, label {
+    color: #1f2937 !important;
+}
+
+/* Allow white text only on dark backgrounds */
+.bg-indigo-600, .bg-indigo-900, .bg-indigo-800, .bg-indigo-700 {
+    color: #ffffff !important;
+}
+
+.bg-indigo-600 h1, .bg-indigo-600 h2, .bg-indigo-600 p,
+.bg-indigo-900 h1, .bg-indigo-900 h2, .bg-indigo-900 p {
+    color: #ffffff !important;
+}
