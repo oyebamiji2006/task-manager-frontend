@@ -35,3 +35,28 @@ body {
 html, body, #root {
     background-color: #f3f4f6 !important;
 }
+
+/* ✅ FIX: White text on white background */
+.text-gray-800, .text-gray-700, .text-gray-600 {
+    color: #1f2937 !important;
+}
+
+.text-gray-500, .text-gray-400 {
+    color: #6b7280 !important;
+}
+
+.text-gray-900 {
+    color: #111827 !important;
+}
+
+/* Fix card text */
+.bg-white .text-gray-800,
+.bg-white .text-gray-700,
+.bg-white .text-gray-600 {
+    color: #1f2937 !important;
+}
+
+.bg-white .text-gray-500,
+.bg-white .text-gray-400 {
+    color: #6b7280 !important;
+}
