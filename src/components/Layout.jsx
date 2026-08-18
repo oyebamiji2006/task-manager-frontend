@@ -1,18 +1,4 @@
-// At the top of Layout.jsx, after imports
 import React, { useState, useEffect, useRef } from "react";
-// ... other imports ...
-
-// Add this useEffect
-useEffect(() => {
-    // Force body background color
-    document.body.style.backgroundColor = "#f3f4f6";
-    document.documentElement.style.backgroundColor = "#f3f4f6";
-    
-    return () => {
-        document.body.style.backgroundColor = "";
-        document.documentElement.style.backgroundColor = "";
-    };
-}, []);
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -116,16 +102,13 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Alert Banners */}
       <AlertBanner alerts={alerts} onDismiss={dismissAlert} />
 
-      {/* ── DESKTOP SIDEBAR (hidden on mobile) ── */}
       <div
         className={`hidden md:flex ${
           collapsed ? "w-16" : "w-64"
         } bg-indigo-900 text-white flex-col transition-all duration-300 min-h-screen sticky top-0`}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between p-4 border-b border-indigo-700">
           {!collapsed && <h1 className="text-lg font-bold">TaskFlow AI</h1>}
           <button
@@ -136,7 +119,6 @@ const Layout = ({ children }) => {
           </button>
         </div>
 
-        {/* User Info */}
         {!collapsed && (
           <div className="p-4 border-b border-indigo-700">
             <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg mb-2">
@@ -147,7 +129,6 @@ const Layout = ({ children }) => {
           </div>
         )}
 
-        {/* Nav Items */}
         <nav className="flex-1 p-2 space-y-1 mt-2">
           {navItems.map((item) => (
             <button
@@ -165,7 +146,6 @@ const Layout = ({ children }) => {
           ))}
         </nav>
 
-        {/* Logout */}
         <div className="p-2 border-t border-indigo-700">
           <button
             onClick={handleLogout}
@@ -177,9 +157,7 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-      {/* ── MOBILE LAYOUT ── */}
       <div className="flex flex-col flex-1 min-h-screen md:hidden">
-        {/* Mobile Top Bar */}
         <div className="bg-indigo-900 text-white flex items-center justify-between px-4 py-3 sticky top-0 z-40">
           <h1 className="text-base font-bold">TaskFlow AI</h1>
           <div className="flex items-center gap-3">
@@ -195,7 +173,6 @@ const Layout = ({ children }) => {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="bg-indigo-800 text-white z-30 shadow-lg">
             <div className="px-4 py-3 border-b border-indigo-700">
@@ -226,12 +203,10 @@ const Layout = ({ children }) => {
           </div>
         )}
 
-        {/* Mobile Page Content - FIXED with proper padding */}
         <div className="flex-1 overflow-auto pb-20 pt-2 px-2 sm:px-3">
           {children}
         </div>
 
-        {/* Mobile Bottom Navigation Bar */}
         <div className="bg-indigo-900 text-white flex justify-around items-center py-2 px-1 border-t border-indigo-700 sticky bottom-0 z-40">
           {navItems.map((item) => (
             <button
@@ -250,7 +225,6 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-      {/* ── DESKTOP MAIN CONTENT ── */}
       <div className="hidden md:block flex-1 overflow-auto p-4 md:p-6 bg-gray-50">
         {children}
       </div>
